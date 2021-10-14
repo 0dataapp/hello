@@ -43,7 +43,7 @@ async function createTask() {
     }
 
     // TODO escape description string.
-    await createSolidDocument(tasksContainerUrl, `
+    const documentUrl = await createSolidDocument(tasksContainerUrl, `
         @prefix schema: <https://schema.org/> .
 
         <#it>
@@ -51,8 +51,34 @@ async function createTask() {
             schema:actionStatus schema:PotentialActionStatus ;
             schema:description "${description}" .
     `);
+    const taskUrl = `${documentUrl}#it`;
 
-    appendTaskItem({ description });
+    appendTaskItem({ url: taskUrl, description });
+}
+
+async function updateTask(taskUrl, complete) {
+    const documentUrl = getSolidDocumentUrl(taskUrl);
+
+    await updateSolidDocument(documentUrl, `
+        DELETE DATA {
+            <#it>
+                <https://schema.org/actionStatus>
+                <https://schema.org/${complete ? 'PotentialActionStatus' : 'CompletedActionStatus'}> .
+        } ;
+        INSERT DATA {
+            <#it>
+                <https://schema.org/actionStatus>
+                <https://schema.org/${complete ? 'CompletedActionStatus' : 'PotentialActionStatus'}> .
+        }
+    `);
+}
+
+async function deleteTask(taskUrl, taskElement) {
+    const documentUrl = getSolidDocumentUrl(taskUrl);
+
+    await deleteSolidDocument(taskUrl);
+
+    taskElement.remove();
 }
 
 // ------------------------- INTERNAL -------------------------------
@@ -83,6 +109,26 @@ async function createSolidDocument(url, contents) {
 
     if (response.status !== 201)
         throw new Error(`Failed creating document at ${url}, returned status ${response.status}`);
+
+    return response.headers.get('Location');
+}
+
+async function updateSolidDocument(url, update) {
+    const response = await solidClientAuthentication.fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/sparql-update' },
+        body: update,
+    });
+
+    if (response.status !== 205)
+        throw new Error(`Failed updating document at ${url}, returned status ${response.status}`);
+}
+
+async function deleteSolidDocument(url) {
+    const response = await solidClientAuthentication.fetch(url, { method: 'DELETE' });
+
+    if (response.status !== 205)
+        throw new Error(`Failed deleting document at ${url}, returned status ${response.status}`);
 }
 
 async function createSolidContainer(url, name) {
@@ -95,8 +141,16 @@ async function createSolidContainer(url, name) {
         },
     });
 
-    if (response.status !== 204)
+    if (response.status !== 201)
         throw new Error(`Failed creating container at ${url}, returned status ${response.status}`);
+}
+
+function getSolidDocumentUrl(resourceUrl) {
+    const url = new URL(resourceUrl);
+
+    url.hash = '';
+
+    return url.href;
 }
 
 async function fetchUserProfile(webId) {
@@ -155,33 +209,55 @@ async function loadTasks() {
 
     for (const containmentQuad of containmentQuads) {
         const documentQuads = await readSolidDocument(containmentQuad.object.value);
+        const typeQuad = documentQuads.find(
+            quad =>
+                quad.predicate.value === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' &&
+                quad.object.value === 'https://schema.org/Action'
+        );
 
-        // TODO filter by resource.
-        if (
-            !documentQuads.some(
-                quad =>
-                    quad.predicate.value === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' &&
-                    quad.object.value === 'https://schema.org/Action'
-            )
-        ) {
+        if (!typeQuad) {
             // Not a Task, we can ignore this document.
 
             return;
         }
 
-        const descriptionQuad = documentQuads.find(quad => quad.predicate.value === 'https://schema.org/description');
-        const task = {
-            description: descriptionQuad?.object.value || '-',
-        };
+        const taskUrl = typeQuad.subject.value;
+        const descriptionQuad = documentQuads.find(
+            quad =>
+                quad.subject.value === taskUrl &&
+                quad.predicate.value === 'https://schema.org/description'
+        );
+        const statusQuad = documentQuads.find(
+            quad =>
+                quad.subject.value === taskUrl &&
+                quad.predicate.value === 'https://schema.org/actionStatus'
+        );
 
-        appendTaskItem(task);
+        appendTaskItem({
+            url: taskUrl,
+            description: descriptionQuad?.object.value || '-',
+            completed: statusQuad?.object.value === 'https://schema.org/CompletedActionStatus',
+        });
     }
 }
 
 function appendTaskItem(task) {
     const taskItem = document.createElement('li');
 
-    taskItem.innerText = task.description;
+    taskItem.innerHTML = `
+        <input
+            type="checkbox"
+            ${task.completed && 'checked'}
+            onchange="updateTask('${task.url}', this.checked)"
+        >
+        <button
+            type="button"
+            onclick="deleteTask('${task.url}', this.parentElement)"
+        >
+            delete
+        </button>
+        ${task.description}
+    `;
 
     document.getElementById('tasks').appendChild(taskItem);
 }

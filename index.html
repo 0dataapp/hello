@@ -10,16 +10,16 @@
     <body>
 
         <div class="auth-guest">
-            <button onclick="login()">Log in</button>
+            <button type="button" onclick="login()">Log in</button>
         </div>
 
         <div class="auth-user">
             <h1>Hello, <span id="username"></span>!</h1>
-            <button onclick="logout()">Log out</button>
+            <button type="button" onclick="logout()">Log out</button>
 
             <h2>Tasks</h2>
             <ul id="tasks"></ul>
-            <button onclick="createTask()">Create task</button>
+            <button type="button" onclick="createTask()">Create task</button>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/n3-browserify@1.11.1"></script>
