@@ -123,7 +123,7 @@ async function readSolidDocument(url) {
     try {
         const response = await solidClientAuthentication.fetch(url, { headers: { Accept: 'text/turtle' } });
 
-        if (response.status !== 200)
+        if (!isSuccessfulStatusCode(response.status))
             return null;
 
         const data = await response.text();
@@ -142,7 +142,7 @@ async function createSolidDocument(url, contents) {
         body: contents,
     });
 
-    if (response.status !== 201)
+    if (!isSuccessfulStatusCode(response.status))
         throw new Error(`Failed creating document at ${url}, returned status ${response.status}`);
 
     return response.headers.get('Location');
@@ -155,14 +155,14 @@ async function updateSolidDocument(url, update) {
         body: update,
     });
 
-    if (response.status !== 205)
+    if (!isSuccessfulStatusCode(response.status))
         throw new Error(`Failed updating document at ${url}, returned status ${response.status}`);
 }
 
 async function deleteSolidDocument(url) {
     const response = await solidClientAuthentication.fetch(url, { method: 'DELETE' });
 
-    if (response.status !== 205)
+    if (!isSuccessfulStatusCode(response.status))
         throw new Error(`Failed deleting document at ${url}, returned status ${response.status}`);
 }
 
@@ -176,8 +176,12 @@ async function createSolidContainer(url, name) {
         },
     });
 
-    if (response.status !== 201)
+    if (!isSuccessfulStatusCode(response.status))
         throw new Error(`Failed creating container at ${url}, returned status ${response.status}`);
+}
+
+function isSuccessfulStatusCode(statusCode) {
+    return Math.floor(statusCode / 100) === 2;
 }
 
 function getSolidDocumentUrl(resourceUrl) {
