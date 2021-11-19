@@ -1,16 +1,22 @@
 let user, tasksContainerUrl;
 
 async function restoreSession() {
-    await solidClientAuthentication.handleIncomingRedirect({ restorePreviousSession: true });
+    try {
+        await solidClientAuthentication.handleIncomingRedirect({ restorePreviousSession: true });
 
-    const session = solidClientAuthentication.getDefaultSession();
+        const session = solidClientAuthentication.getDefaultSession();
 
-    if (!session.info.isLoggedIn)
+        if (!session.info.isLoggedIn)
+            return false;
+
+        user = await fetchUserProfile(session.info.webId);
+
+        return user;
+    } catch (error) {
+        alert(error.message);
+
         return false;
-
-    user = await fetchUserProfile(session.info.webId);
-
-    return user;
+    }
 }
 
 function performLogin(loginUrl) {

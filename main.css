@@ -1,7 +1,0 @@
-body:not(.authenticated) .auth-user {
-    display: none;
-}
-
-body.authenticated .auth-guest {
-    display: none;
-}

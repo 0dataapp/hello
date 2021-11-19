@@ -1,11 +1,16 @@
 async function main() {
     const user = await restoreSession();
 
-    if (!user)
+    document.getElementById('loading').setAttribute('hidden', '');
+
+    if (!user) {
+        document.getElementById('auth-guest').removeAttribute('hidden');
+
         return;
+    }
 
     document.getElementById('username').innerText = user.name;
-    document.body.classList.add('authenticated');
+    document.getElementById('auth-user').removeAttribute('hidden');
 
     const tasks = await loadTasks();
 
@@ -24,9 +29,13 @@ function login() {
 }
 
 async function logout() {
+    document.getElementById('logout-button').setAttribute('disabled', '');
+
     await performLogout();
 
-    document.body.classList.remove('authenticated');
+    document.getElementById('auth-guest').removeAttribute('hidden');
+    document.getElementById('auth-user').setAttribute('hidden', '');
+    document.getElementById('logout-button').removeAttribute('disabled');
 }
 
 async function createTask() {
@@ -40,11 +49,19 @@ async function createTask() {
     appendTaskItem(task);
 }
 
-async function updateTask(taskUrl, done) {
+async function updateTask(taskUrl, button) {
+    const done = button.innerText === 'Complete';
+    button.setAttribute('disabled', '');
+
     await performTaskUpdate(taskUrl, done);
+
+    button.removeAttribute('disabled');
+    button.innerText = done ? 'Undo' : 'Complete';
 }
 
-async function deleteTask(taskUrl, taskElement) {
+async function deleteTask(taskUrl, taskElement, button) {
+    button.setAttribute('disabled', '');
+
     await performTaskDeletion(taskUrl);
 
     taskElement.remove();
@@ -54,18 +71,20 @@ function appendTaskItem(task) {
     const taskItem = document.createElement('li');
 
     taskItem.innerHTML = `
-        <input
-            type="checkbox"
-            ${task.done && 'checked'}
-            onchange="updateTask('${task.url}', this.checked)"
-        >
         <button
             type="button"
-            onclick="deleteTask('${task.url}', this.parentElement)"
+            onclick="deleteTask('${task.url}', this.parentElement, this)"
         >
-            delete
+            Delete
         </button>
-        ${task.description}
+        <button
+            type="button"
+            onclick="updateTask('${task.url}', this)"
+            style="width:100px"
+        >
+            ${task.done ? 'Undo' : 'Complete'}
+        </button>
+        <span>${task.description}</span>
     `;
 
     document.getElementById('tasks').appendChild(taskItem);
