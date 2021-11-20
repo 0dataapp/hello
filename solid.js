@@ -193,7 +193,9 @@ async function createSolidDocument(url, contents) {
     if (!isSuccessfulStatusCode(response.status))
         throw new Error(`Failed creating document at ${url}, returned status ${response.status}`);
 
-    return response.headers.get('Location');
+    const location = response.headers.get('Location');
+
+    return new URL(location, url).href;
 }
 
 async function updateSolidDocument(url, update) {
