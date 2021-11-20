@@ -20,7 +20,7 @@ async function main() {
 }
 
 function login() {
-    const loginUrl = prompt('Introduce your Solid login url');
+    const loginUrl = getLoginUrl();
 
     if (!loginUrl)
         return;

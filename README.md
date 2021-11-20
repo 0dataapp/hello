@@ -4,7 +4,13 @@ This is a simple application illustrating how to get started with [Solid](https:
 
 It only has two dependencies: [an authentication library](https://github.com/inrupt/solid-client-authn-js) and [an RDF parsing library](https://github.com/rdfjs/N3.js). Everything else is plain HTML, CSS and JavaScript. All the functionality related with Solid is contained in a single file; `solid.js`.
 
-## Instructions
+## Documentation
+
+You can find the documentation in the `solid.js` file, and some general Solid concepts in [the glossary](Glossary.md).
+
+The `index.html` and `main.js` files are not documented, but they should be fairly easy to understand if you're already familiar with HTML and JavaScript. The application doesn't have any custom CSS as it is using a classless CSS framework called [Simple.css](https://simplecss.org).
+
+## Usage instructions
 
 If you want to play around with the application, you'll need to log into a [Solid POD](https://solidproject.org/users/get-a-pod).
 

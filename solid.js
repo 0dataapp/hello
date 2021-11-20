@@ -1,6 +1,18 @@
+// You can find the basic Solid concepts explained in the Glossary.md file, inline comments talk about
+// the specifics of how this application is implemented.
+
 let user, tasksContainerUrl;
 
 async function restoreSession() {
+    // This function uses Inrupt's authentication library to restore a previous session. If you were
+    // already logged into the application last time that you used it, this will trigger a redirect that
+    // takes you back to the application. This usually happens without user interaction, but if you hadn't
+    // logged in for a while, your identity provider may ask for your credentials again.
+    //
+    // After a successful login, this will also read the profile from your POD.
+    //
+    // @see https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate-browser/
+
     try {
         await solidClientAuthentication.handleIncomingRedirect({ restorePreviousSession: true });
 
@@ -19,6 +31,25 @@ async function restoreSession() {
     }
 }
 
+function getLoginUrl() {
+    // Asking for a login url in Solid is kind of tricky. In a real application, you should be
+    // asking for a user's webId, and reading the user's profile you would be able to obtain
+    // the url of their identity provider. However, most users may not know what their webId is,
+    // and they introduce the url of their issue provider directly. In order to simplify this
+    // example, we just use the base domain of the url they introduced, and this should work
+    // most of the time.
+    const url = prompt('Introduce your Solid login url');
+
+    if (!url)
+        return null;
+
+    const loginUrl = new URL(url);
+    loginUrl.hash = '';
+    loginUrl.pathname = '';
+
+    return loginUrl.href;
+}
+
 function performLogin(loginUrl) {
     solidClientAuthentication.login({
         oidcIssuer: loginUrl,
@@ -32,22 +63,31 @@ async function performLogout() {
 }
 
 async function performTaskCreation(description) {
+    // Data discovery mechanisms are still being defined in Solid, but so far it is clear that
+    // applications should not hard-code the url of their containers like we are doing in this
+    // example.
+    //
+    // In a real application, you should use one of these two alternatives:
+    //
+    // - The Type index. This is the one that most applications are using in practice today:
+    //   https://github.com/solid/solid/blob/main/proposals/data-discovery.md#type-index-registry
+    //
+    // - SAI, or Solid App Interoperability. This one is still being defined:
+    //   https://solid.github.io/data-interoperability-panel/specification/
+
     if (!tasksContainerUrl) {
         await createSolidContainer(user.storageUrl, 'tasks');
-
-        // TODO register in type index.
 
         tasksContainerUrl = `${user.storageUrl}tasks/`;
     }
 
-    // TODO escape description string.
     const documentUrl = await createSolidDocument(tasksContainerUrl, `
         @prefix schema: <https://schema.org/> .
 
         <#it>
             a schema:Action ;
             schema:actionStatus schema:PotentialActionStatus ;
-            schema:description "${description}" .
+            schema:description "${escapeText(description)}" .
     `);
     const taskUrl = `${documentUrl}#it`;
 
@@ -78,7 +118,9 @@ async function performTaskDeletion(taskUrl) {
 }
 
 async function loadTasks() {
-    // TODO read from type index.
+    // In a real application, you shouldn't hard-code the path to the container like we're doing here.
+    // Read more about this in the comments on the performTaskCreation function.
+
     const containerQuads = await readSolidDocument(`${user.storageUrl}tasks/`);
 
     if (!containerQuads)
@@ -223,4 +265,8 @@ async function findUserStorage(url) {
         return url.href;
 
     return findUserStorage(url.href)
+}
+
+function escapeText(text) {
+    return text.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
 }
