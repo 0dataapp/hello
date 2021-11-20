@@ -9,7 +9,7 @@ async function main() {
         return;
     }
 
-    document.getElementById('username').innerText = user.name;
+    document.getElementById('username').innerHTML = `<a href="${user.url}" target="_blank">${user.name}</a>`;
     document.getElementById('auth-user').removeAttribute('hidden');
 
     const tasks = await loadTasks();

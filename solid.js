@@ -246,6 +246,7 @@ async function fetchUserProfile(webId) {
     const storageQuad = profileQuads.find(quad => quad.predicate.value === 'http://www.w3.org/ns/pim/space#storage');
 
     return {
+        url: webId,
         name: nameQuad?.object.value || 'Anonymous',
         storageUrl: storageQuad?.object.value || await findUserStorage(webId),
     };
