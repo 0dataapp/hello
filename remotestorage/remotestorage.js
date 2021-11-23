@@ -27,14 +27,13 @@ async function restoreSession() {
     await init();
 
     try {
-        await solidClientAuthentication.handleIncomingRedirect({ restorePreviousSession: true });
-
-        const session = solidClientAuthentication.getDefaultSession();
-
-        if (!session.info.isLoggedIn)
+        if (!remoteStorage.remote.connected)
             return false;
 
-        user = await fetchUserProfile(session.info.webId);
+        user = {
+            name: remoteStorage.remote.userAddress,
+            url: remoteStorage.remote.userAddress,
+        };
 
         return user;
     } catch (error) {
