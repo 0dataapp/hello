@@ -65,20 +65,7 @@ async function performTaskCreation(description) {
 }
 
 async function performTaskUpdate(taskUrl, done) {
-    const documentUrl = getSolidDocumentUrl(taskUrl);
-
-    await updateSolidDocument(documentUrl, `
-        DELETE DATA {
-            <#it>
-                <https://schema.org/actionStatus>
-                <https://schema.org/${done ? 'PotentialActionStatus' : 'CompletedActionStatus'}> .
-        } ;
-        INSERT DATA {
-            <#it>
-                <https://schema.org/actionStatus>
-                <https://schema.org/${done ? 'CompletedActionStatus' : 'PotentialActionStatus'}> .
-        }
-    `);
+    await remoteStorage.todos.updateTask(...arguments);
 }
 
 async function performTaskDeletion(taskUrl) {
