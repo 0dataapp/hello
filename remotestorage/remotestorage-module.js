@@ -31,6 +31,17 @@ var Todos = {
           return item;
         },
 
+        async updateTask (url, done) {
+          // set `maxAge` to `false` to read from cache first
+          const item = await privateClient.getObject(url, false);
+
+          await privateClient.storeObject('todo', item.url, Object.assign(item, {
+            done,
+          }));
+
+          return item;
+        },
+
       }
     }
   }
