@@ -57,7 +57,7 @@ function performLogin(storageAddress) {
 }
 
 async function performLogout() {
-    await solidClientAuthentication.logout();
+    return remoteStorage.disconnect();
 }
 
 async function performTaskCreation(description) {
