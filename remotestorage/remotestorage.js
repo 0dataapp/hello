@@ -61,35 +61,7 @@ async function performLogout() {
 }
 
 async function performTaskCreation(description) {
-    // Data discovery mechanisms are still being defined in Solid, but so far it is clear that
-    // applications should not hard-code the url of their containers like we are doing in this
-    // example.
-    //
-    // In a real application, you should use one of these two alternatives:
-    //
-    // - The Type index. This is the one that most applications are using in practice today:
-    //   https://github.com/solid/solid/blob/main/proposals/data-discovery.md#type-index-registry
-    //
-    // - SAI, or Solid App Interoperability. This one is still being defined:
-    //   https://solid.github.io/data-interoperability-panel/specification/
-
-    if (!tasksContainerUrl) {
-        await createSolidContainer(user.storageUrl, 'tasks');
-
-        tasksContainerUrl = `${user.storageUrl}tasks/`;
-    }
-
-    const documentUrl = await createSolidDocument(tasksContainerUrl, `
-        @prefix schema: <https://schema.org/> .
-
-        <#it>
-            a schema:Action ;
-            schema:actionStatus schema:PotentialActionStatus ;
-            schema:description "${escapeText(description)}" .
-    `);
-    const taskUrl = `${documentUrl}#it`;
-
-    return { url: taskUrl, description };
+    return await remoteStorage.todos.addTask(description);
 }
 
 async function performTaskUpdate(taskUrl, done) {
