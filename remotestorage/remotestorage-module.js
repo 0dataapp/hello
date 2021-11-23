@@ -42,6 +42,11 @@ var Todos = {
           return item;
         },
 
+        deleteTask: privateClient.remove.bind(privateClient),
+
+        listTasks: function() {
+          return privateClient.getAll('');
+        }
       }
     }
   }
