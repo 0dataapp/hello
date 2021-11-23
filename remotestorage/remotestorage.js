@@ -69,9 +69,7 @@ async function performTaskUpdate(taskUrl, done) {
 }
 
 async function performTaskDeletion(taskUrl) {
-    const documentUrl = getSolidDocumentUrl(taskUrl);
-
-    await deleteSolidDocument(taskUrl);
+    await remoteStorage.todos.deleteTask(taskUrl);
 }
 
 async function loadTasks() {
