@@ -1,17 +1,30 @@
+const remoteStorage = new RemoteStorage({
+  modules: [
+      Todos,
+  ],
+});
+
+async function init() {
+  remoteStorage.access.claim('todos', 'rw');
+
+  remoteStorage.todos.init();
+
+  return new Promise(function (res) {
+    remoteStorage.on('ready', function() {
+        return res();
+    }); 
+  });
+
+}
+
 // You can find the basic Solid concepts explained in the Glossary.md file, inline comments talk about
 // the specifics of how this application is implemented.
 
 let user, tasksContainerUrl;
 
 async function restoreSession() {
-    // This function uses Inrupt's authentication library to restore a previous session. If you were
-    // already logged into the application last time that you used it, this will trigger a redirect that
-    // takes you back to the application. This usually happens without user interaction, but if you hadn't
-    // logged in for a while, your identity provider may ask for your credentials again.
-    //
-    // After a successful login, this will also read the profile from your POD.
-    //
-    // @see https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate-browser/
+    // wait for library ready event
+    await init();
 
     try {
         await solidClientAuthentication.handleIncomingRedirect({ restorePreviousSession: true });
@@ -32,30 +45,16 @@ async function restoreSession() {
 }
 
 function getLoginUrl() {
-    // Asking for a login url in Solid is kind of tricky. In a real application, you should be
-    // asking for a user's webId, and reading the user's profile you would be able to obtain
-    // the url of their identity provider. However, most users may not know what their webId is,
-    // and they introduce the url of their issue provider directly. In order to simplify this
-    // example, we just use the base domain of the url they introduced, and this should work
-    // most of the time.
-    const url = prompt('Introduce your Solid login url');
+    const url = prompt('Introduce your remoteStorage address');
 
     if (!url)
         return null;
 
-    const loginUrl = new URL(url);
-    loginUrl.hash = '';
-    loginUrl.pathname = '';
-
-    return loginUrl.href;
+    return url;
 }
 
-function performLogin(loginUrl) {
-    solidClientAuthentication.login({
-        oidcIssuer: loginUrl,
-        redirectUrl: window.location.href,
-        clientName: 'Hello World',
-    });
+function performLogin(storageAddress) {
+    remoteStorage.connect(storageAddress);
 }
 
 async function performLogout() {
