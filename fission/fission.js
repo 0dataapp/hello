@@ -101,9 +101,8 @@ async function performTaskUpdate(taskUrl, done) {
 }
 
 async function performTaskDeletion(taskUrl) {
-    const documentUrl = getSolidDocumentUrl(taskUrl);
-
-    await deleteSolidDocument(taskUrl);
+    await wnfs.rm(webnative.path.file('private', 'todos', taskUrl))
+    await wnfs.publish();
 }
 
 async function loadTasks() {
