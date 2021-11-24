@@ -113,53 +113,9 @@ async function performTaskDeletion(taskUrl) {
 }
 
 async function loadTasks() {
-    // In a real application, you shouldn't hard-code the path to the container like we're doing here.
-    // Read more about this in the comments on the performTaskCreation function.
-
-    const containerQuads = await readSolidDocument(`${user.storageUrl}tasks/`);
-
-    if (!containerQuads)
-        return [];
-
-    tasksContainerUrl = `${user.storageUrl}tasks/`;
-
-    const tasks = [];
-    const containmentQuads = containerQuads.filter(quad => quad.predicate.value === 'http://www.w3.org/ns/ldp#contains');
-
-    for (const containmentQuad of containmentQuads) {
-        const documentQuads = await readSolidDocument(containmentQuad.object.value);
-        const typeQuad = documentQuads.find(
-            quad =>
-                quad.predicate.value === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' &&
-                quad.object.value === 'https://schema.org/Action'
-        );
-
-        if (!typeQuad) {
-            // Not a Task, we can ignore this document.
-
-            continue;
-        }
-
-        const taskUrl = typeQuad.subject.value;
-        const descriptionQuad = documentQuads.find(
-            quad =>
-                quad.subject.value === taskUrl &&
-                quad.predicate.value === 'https://schema.org/description'
-        );
-        const statusQuad = documentQuads.find(
-            quad =>
-                quad.subject.value === taskUrl &&
-                quad.predicate.value === 'https://schema.org/actionStatus'
-        );
-
-        tasks.push({
-            url: taskUrl,
-            description: descriptionQuad?.object.value || '-',
-            done: statusQuad?.object.value === 'https://schema.org/CompletedActionStatus',
-        });
-    }
-
-    return tasks;
+    return (await Promise.all(Object.keys(await wnfs.ls(webnative.path.directory('private', 'todos'))).map(function (e) {
+      return wnfs.cat(webnative.path.file('private', 'todos', e));
+    }))).map(JSON.parse);
 }
 
 async function readSolidDocument(url) {
