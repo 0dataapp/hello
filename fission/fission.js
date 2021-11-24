@@ -90,20 +90,14 @@ async function performTaskCreation(description) {
 }
 
 async function performTaskUpdate(taskUrl, done) {
-    const documentUrl = getSolidDocumentUrl(taskUrl);
+    const item = JSON.parse(await wnfs.cat(webnative.path.file('private', 'todos', taskUrl)));
 
-    await updateSolidDocument(documentUrl, `
-        DELETE DATA {
-            <#it>
-                <https://schema.org/actionStatus>
-                <https://schema.org/${done ? 'PotentialActionStatus' : 'CompletedActionStatus'}> .
-        } ;
-        INSERT DATA {
-            <#it>
-                <https://schema.org/actionStatus>
-                <https://schema.org/${done ? 'CompletedActionStatus' : 'PotentialActionStatus'}> .
-        }
-    `);
+    await wnfs.write(webnative.path.file('private', 'todos', item.url), JSON.stringify(Object.assign(item, {
+      done,
+    })));
+    await wnfs.publish();
+
+    return item;
 }
 
 async function performTaskDeletion(taskUrl) {
