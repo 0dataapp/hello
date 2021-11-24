@@ -2,8 +2,10 @@ let publicLink = null;
 let username, goToLobby, wnfs;
 
 async function init() {
+    // we work with the webnative library through the `state` variable returned from this function
     await webnative.initialize({
         permissions: {
+            // there is also an alternate 'Apps' directory for which you can claim permission, see https://guide.fission.codes/developers/webnative/auth
             fs: {
                 private: [webnative.path.directory('todos')]
             }
@@ -12,6 +14,7 @@ async function init() {
         switch (state.scenario) {
             case webnative.Scenario.AuthSucceeded:
             case webnative.Scenario.Continuation:
+                // authorized
                 username = state.username;
                 wnfs = state.fs;
 
@@ -19,6 +22,7 @@ async function init() {
 
             case webnative.Scenario.NotAuthorised:
             case webnative.Scenario.AuthCancelled:
+                // not authorized
                 goToLobby = function () {
                     webnative.redirectToLobby(state.permissions);
                 };
@@ -27,6 +31,7 @@ async function init() {
             }
     }).catch(error => {
         switch (error) {
+            // private mode and non-localhost:3000 may cause issues
             case webnative.InitialisationError.UnsupportedBrowser:
                 window.alert('Unsupported browser.')
                 break;
