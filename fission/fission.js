@@ -1,29 +1,59 @@
+let publicLink = null;
+let username, goToLobby;
+
+async function init() {
+    await webnative.initialize({
+        permissions: {
+            fs: {
+                private: [webnative.path.directory('todos')]
+            }
+        }
+    }).then(async state => {
+        switch (state.scenario) {
+            case webnative.Scenario.AuthSucceeded:
+            case webnative.Scenario.Continuation:
+                username = state.username;
+
+                break;
+
+            case webnative.Scenario.NotAuthorised:
+            case webnative.Scenario.AuthCancelled:
+                goToLobby = function () {
+                    webnative.redirectToLobby(state.permissions);
+                };
+
+                break;
+            }
+    }).catch(error => {
+        switch (error) {
+            case webnative.InitialisationError.UnsupportedBrowser:
+                window.alert('Unsupported browser.')
+                break;
+
+            case webnative.InitialisationError.InsecureContext:
+                window.alert('Insecure context.')
+                break;
+            }
+    })
+}
+
 // You can find the basic Solid concepts explained in the Glossary.md file, inline comments talk about
 // the specifics of how this application is implemented.
 
 let user, tasksContainerUrl;
 
 async function restoreSession() {
-    // This function uses Inrupt's authentication library to restore a previous session. If you were
-    // already logged into the application last time that you used it, this will trigger a redirect that
-    // takes you back to the application. This usually happens without user interaction, but if you hadn't
-    // logged in for a while, your identity provider may ask for your credentials again.
-    //
-    // After a successful login, this will also read the profile from your POD.
-    //
-    // @see https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/authenticate-browser/
+    // wait for library ready event
+    await init();
 
     try {
-        await solidClientAuthentication.handleIncomingRedirect({ restorePreviousSession: true });
-
-        const session = solidClientAuthentication.getDefaultSession();
-
-        if (!session.info.isLoggedIn)
+        if (!username)
             return false;
 
-        user = await fetchUserProfile(session.info.webId);
-
-        return user;
+        return {
+            name: username,
+            url: username,
+        };
     } catch (error) {
         alert(error.message);
 
@@ -32,30 +62,11 @@ async function restoreSession() {
 }
 
 function getLoginUrl() {
-    // Asking for a login url in Solid is kind of tricky. In a real application, you should be
-    // asking for a user's webId, and reading the user's profile you would be able to obtain
-    // the url of their identity provider. However, most users may not know what their webId is,
-    // and they introduce the url of their issue provider directly. In order to simplify this
-    // example, we just use the base domain of the url they introduced, and this should work
-    // most of the time.
-    const url = prompt('Introduce your Solid login url');
-
-    if (!url)
-        return null;
-
-    const loginUrl = new URL(url);
-    loginUrl.hash = '';
-    loginUrl.pathname = '';
-
-    return loginUrl.href;
+    return 'TO_BE_DETERMINED';
 }
 
 function performLogin(loginUrl) {
-    solidClientAuthentication.login({
-        oidcIssuer: loginUrl,
-        redirectUrl: window.location.href,
-        clientName: 'Hello World',
-    });
+    goToLobby();
 }
 
 async function performLogout() {
