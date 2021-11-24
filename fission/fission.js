@@ -70,7 +70,9 @@ function performLogin(loginUrl) {
 }
 
 async function performLogout() {
-    await solidClientAuthentication.logout();
+    await webnative.leave({
+        withoutRedirect: true,
+    });
 }
 
 async function performTaskCreation(description) {
