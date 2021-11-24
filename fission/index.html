@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <title>Solid Hello World</title>
+        <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+    </head>
+
+    <body>
+        <h1>Solid Hello World</h1>
+
+        <div id="loading">
+            <p>Loading...</p>
+        </div>
+
+        <div id="auth-guest" hidden>
+            <p>Hi there!</p>
+            <p>
+                This page is a showcase of a simple <a href="https://solidproject.org/" target="_blank">Solid application</a>
+                built using JavaScript, CSS and HTML. You can look at the source code and learn how to use it in
+                <a href="https://github.com/0dataapp/hello-world-solid" target="_blank">the repository</a>.
+            </p>
+
+            <button id="login-button" type="button" onclick="login()">Log in with Solid</button>
+        </div>
+
+        <div id="auth-user" hidden>
+            <p>Hello, <span id="username"></span>!</p>
+            <button id="logout-button" type="button" onclick="logout()">Log out</button>
+
+            <h2>Your tasks</h2>
+            <ul id="tasks"></ul>
+            <button type="button" onclick="createTask()">Create new task</button>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/n3-browserify@1.11.1"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@inrupt/solid-client-authn-browser@1.11.2/dist/solid-client-authn.bundle.js"></script>
+        <script src="solid.js"></script>
+        <script src="main.js"></script>
+
+    </body>
+
+</html>
