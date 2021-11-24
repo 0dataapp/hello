@@ -1,5 +1,5 @@
 let publicLink = null;
-let username, goToLobby;
+let username, goToLobby, wnfs;
 
 async function init() {
     await webnative.initialize({
@@ -13,6 +13,7 @@ async function init() {
             case webnative.Scenario.AuthSucceeded:
             case webnative.Scenario.Continuation:
                 username = state.username;
+                wnfs = state.fs;
 
                 break;
 
@@ -76,35 +77,16 @@ async function performLogout() {
 }
 
 async function performTaskCreation(description) {
-    // Data discovery mechanisms are still being defined in Solid, but so far it is clear that
-    // applications should not hard-code the url of their containers like we are doing in this
-    // example.
-    //
-    // In a real application, you should use one of these two alternatives:
-    //
-    // - The Type index. This is the one that most applications are using in practice today:
-    //   https://github.com/solid/solid/blob/main/proposals/data-discovery.md#type-index-registry
-    //
-    // - SAI, or Solid App Interoperability. This one is still being defined:
-    //   https://solid.github.io/data-interoperability-panel/specification/
+    const url = Date.now().toString(36).toLowerCase();
+    const item = {
+        url,
+        description,
+    };
 
-    if (!tasksContainerUrl) {
-        await createSolidContainer(user.storageUrl, 'tasks');
+    await wnfs.write(webnative.path.file('private', 'todos', url), JSON.stringify(item));
+    await wnfs.publish();
 
-        tasksContainerUrl = `${user.storageUrl}tasks/`;
-    }
-
-    const documentUrl = await createSolidDocument(tasksContainerUrl, `
-        @prefix schema: <https://schema.org/> .
-
-        <#it>
-            a schema:Action ;
-            schema:actionStatus schema:PotentialActionStatus ;
-            schema:description "${escapeText(description)}" .
-    `);
-    const taskUrl = `${documentUrl}#it`;
-
-    return { url: taskUrl, description };
+    return item;
 }
 
 async function performTaskUpdate(taskUrl, done) {
