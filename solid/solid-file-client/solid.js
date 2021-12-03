@@ -2,8 +2,7 @@
 // the specifics of how this application is implemented.
 
 let user, tasksContainerUrl;
-const auth = solidClientAuthentication
-const fc = new SolidFileClient(auth)
+const solidFileClient = new SolidFileClient(solidClientAuthentication);
 
 async function restoreSession() {
     // This function uses Inrupt's authentication library to restore a previous session. If you were
@@ -78,10 +77,9 @@ async function performTaskCreation(description) {
     //   https://solid.github.io/data-interoperability-panel/specification/
 
     if (!tasksContainerUrl) {
-        try {
-            await fc.createFolder(`${user.storageUrl}tasks/`)
-            tasksContainerUrl = `${user.storageUrl}tasks/`
-        } catch (e) {}
+        await createSolidContainer(user.storageUrl, 'tasks');
+
+        tasksContainerUrl = `${user.storageUrl}tasks/`;
     }
 
     const documentUrl = await createSolidDocument(tasksContainerUrl, `
@@ -98,33 +96,33 @@ async function performTaskCreation(description) {
 }
 
 async function performTaskUpdate(taskUrl, done) {
-    const update = `
-    DELETE DATA {
-        <#it>
-            <https://schema.org/actionStatus>
-            <https://schema.org/${done ? 'PotentialActionStatus' : 'CompletedActionStatus'}> .
-    } ;
-    INSERT DATA {
-        <#it>
-            <https://schema.org/actionStatus>
-            <https://schema.org/${done ? 'CompletedActionStatus' : 'PotentialActionStatus'}> .
-    }
-`
     const documentUrl = getSolidDocumentUrl(taskUrl);
-    await fc.patchFile(documentUrl, update, 'application/sparql-update')
+
+    await updateSolidDocument(documentUrl, `
+        DELETE DATA {
+            <#it>
+                <https://schema.org/actionStatus>
+                <https://schema.org/${done ? 'PotentialActionStatus' : 'CompletedActionStatus'}> .
+        } ;
+        INSERT DATA {
+            <#it>
+                <https://schema.org/actionStatus>
+                <https://schema.org/${done ? 'CompletedActionStatus' : 'PotentialActionStatus'}> .
+        }
+    `);
 }
 
 async function performTaskDeletion(taskUrl) {
     const documentUrl = getSolidDocumentUrl(taskUrl);
 
-    await fc.deleteFile(taskUrl);
+    await deleteSolidDocument(documentUrl);
 }
 
 async function loadTasks() {
     // In a real application, you shouldn't hard-code the path to the container like we're doing here.
     // Read more about this in the comments on the performTaskCreation function.
 
-    const containerQuads = await fc.rdf.query(`${user.storageUrl}tasks/`) // readSolidDocument(`${user.storageUrl}tasks/`);
+    const containerQuads = await readSolidDocument(`${user.storageUrl}tasks/`);
 
     if (!containerQuads)
         return [];
@@ -135,7 +133,7 @@ async function loadTasks() {
     const containmentQuads = containerQuads.filter(quad => quad.predicate.value === 'http://www.w3.org/ns/ldp#contains');
 
     for (const containmentQuad of containmentQuads) {
-        const documentQuads = await fc.rdf.query(containmentQuad.object.value) // readSolidDocument(containmentQuad.object.value);
+        const documentQuads = await readSolidDocument(containmentQuad.object.value);
         const typeQuad = documentQuads.find(
             quad =>
                 quad.predicate.value === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' &&
@@ -170,11 +168,53 @@ async function loadTasks() {
     return tasks;
 }
 
+async function readSolidDocument(url) {
+    try {
+        return await solidFileClient.rdf.query(url);
+    } catch (error) {
+        return null;
+    }
+}
+
 async function createSolidDocument(url, contents) {
-    const response = await fc.post(url, { body: contents, headers: { 'content-Type': 'text/turtle' } })
+    const response = await solidFileClient.post(url, {
+        headers: { 'Content-Type': 'text/turtle' },
+        body: contents,
+    });
+
+    if (!isSuccessfulStatusCode(response.status))
+        throw new Error(`Failed creating document at ${url}, returned status ${response.status}`);
+
     const location = response.headers.get('Location');
 
     return new URL(location, url).href;
+}
+
+async function updateSolidDocument(url, update) {
+    const response = await solidFileClient.patchFile(url, update, 'application/sparql-update');
+
+    if (!isSuccessfulStatusCode(response.status))
+        throw new Error(`Failed updating document at ${url}, returned status ${response.status}`);
+}
+
+async function deleteSolidDocument(url) {
+    const response = await solidFileClient.deleteFile(url);
+
+    if (!isSuccessfulStatusCode(response.status))
+        throw new Error(`Failed deleting document at ${url}, returned status ${response.status}`);
+}
+
+async function createSolidContainer(url, name) {
+    const response = await solidFileClient.createFolder(`${url}${name}/`, {
+        headers: { 'Slug': name },
+    });
+
+    if (!isSuccessfulStatusCode(response.status))
+        throw new Error(`Failed creating container at ${url}, returned status ${response.status}`);
+}
+
+function isSuccessfulStatusCode(statusCode) {
+    return Math.floor(statusCode / 100) === 2;
 }
 
 function getSolidDocumentUrl(resourceUrl) {
@@ -186,7 +226,7 @@ function getSolidDocumentUrl(resourceUrl) {
 }
 
 async function fetchUserProfile(webId) {
-    const profileQuads = await fc.rdf.query(webId) // await readSolidDocument(webId);
+    const profileQuads = await readSolidDocument(webId);
     const nameQuad = profileQuads.find(quad => quad.predicate.value === 'http://xmlns.com/foaf/0.1/name');
     const storageQuad = profileQuads.find(quad => quad.predicate.value === 'http://www.w3.org/ns/pim/space#storage');
 
@@ -202,7 +242,7 @@ async function findUserStorage(url) {
     url = url.endsWith('/') ? url + '../' : url + '/../';
     url = new URL(url);
 
-    const response = await fc.fetch(url.href);
+    const response = await solidFileClient.fetch(url.href);
 
     if (response.headers.get('Link')?.includes('<http://www.w3.org/ns/pim/space#Storage>; rel="type"'))
         return url.href;
@@ -210,7 +250,7 @@ async function findUserStorage(url) {
     if (url.pathname === '/')
         return url.href;
 
-    return findUserStorage(url.href)
+    return findUserStorage(url.href);
 }
 
 function escapeText(text) {

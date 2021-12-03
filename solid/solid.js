@@ -114,7 +114,7 @@ async function performTaskUpdate(taskUrl, done) {
 async function performTaskDeletion(taskUrl) {
     const documentUrl = getSolidDocumentUrl(taskUrl);
 
-    await deleteSolidDocument(taskUrl);
+    await deleteSolidDocument(documentUrl);
 }
 
 async function loadTasks() {
@@ -267,7 +267,7 @@ async function findUserStorage(url) {
     if (url.pathname === '/')
         return url.href;
 
-    return findUserStorage(url.href)
+    return findUserStorage(url.href);
 }
 
 function escapeText(text) {
