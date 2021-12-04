@@ -2,9 +2,9 @@
 
 These are simple <a href="https://0data.app" target="_blank">0data apps</a> that demonstrate CRUD operations for <code>/todos</code> only using HTML, CSS, and JavaScript (minimal dependencies, no build systems). Please consult the README for any protocol to learn more:
 
-- [Fission](fission/README.md)
-- [remoteStorage](remotestorage/README.md)
-- [Solid](solid/README.md)
+- [Fission](fission)
+- [remoteStorage](remotestorage)
+- [Solid](solid)
 
 ## Usage instructions
 
