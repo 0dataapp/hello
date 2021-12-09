@@ -3,6 +3,8 @@
 
 let user, tasksContainerUrl;
 const solidFileClient = new SolidFileClient(solidClientAuthentication);
+// new @prefix unknown by solid-namespace
+const schema = solidFileClient.rdf.setPrefix('schema', 'https://schema.org/');
 
 async function restoreSession() {
     // This function uses Inrupt's authentication library to restore a previous session. If you were
@@ -76,12 +78,6 @@ async function performTaskCreation(description) {
     // - SAI, or Solid App Interoperability. This one is still being defined:
     //   https://solid.github.io/data-interoperability-panel/specification/
 
-    if (!tasksContainerUrl) {
-        await createSolidContainer(user.storageUrl, 'tasks');
-
-        tasksContainerUrl = `${user.storageUrl}tasks/`;
-    }
-
     const documentUrl = await createSolidDocument(tasksContainerUrl, `
         @prefix schema: <https://schema.org/> .
 
@@ -122,41 +118,30 @@ async function loadTasks() {
     // In a real application, you shouldn't hard-code the path to the container like we're doing here.
     // Read more about this in the comments on the performTaskCreation function.
 
-    const containerQuads = await readSolidDocument(`${user.storageUrl}tasks/`);
+    if (!tasksContainerUrl) {
+        await createSolidContainer(`${user.storageUrl}tasks/`);
 
-    if (!containerQuads)
-        return [];
-
-    tasksContainerUrl = `${user.storageUrl}tasks/`;
+        tasksContainerUrl = `${user.storageUrl}tasks/`;
+    }
 
     const tasks = [];
-    const containmentQuads = containerQuads.filter(quad => quad.predicate.value === 'http://www.w3.org/ns/ldp#contains');
+    const containmentQuads = await readSolidDocument(`${user.storageUrl}tasks/`, null, { ldp: 'contains' })
+
+    if (!containmentQuads) { return [] }
 
     for (const containmentQuad of containmentQuads) {
-        const documentQuads = await readSolidDocument(containmentQuad.object.value);
-        const typeQuad = documentQuads.find(
-            quad =>
-                quad.predicate.value === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' &&
-                quad.object.value === 'https://schema.org/Action'
-        );
+        const [typeQuad] = await readSolidDocument(containmentQuad.object.value, null, null, '<https://schema.org/Action>');
 
         if (!typeQuad) {
             // Not a Task, we can ignore this document.
-
             continue;
         }
 
         const taskUrl = typeQuad.subject.value;
-        const descriptionQuad = documentQuads.find(
-            quad =>
-                quad.subject.value === taskUrl &&
-                quad.predicate.value === 'https://schema.org/description'
-        );
-        const statusQuad = documentQuads.find(
-            quad =>
-                quad.subject.value === taskUrl &&
-                quad.predicate.value === 'https://schema.org/actionStatus'
-        );
+
+        // https://schema.org ontology : in first line using the 'getPrefix() help, second line with a simple ttl string
+        const [descriptionQuad] = await readSolidDocument(containmentQuad.object.value, `<${taskUrl}>`, { schema: 'description' });
+        const [statusQuad] = await readSolidDocument(containmentQuad.object.value, `<${taskUrl}>`, '<https://schema.org/actionStatus>');
 
         tasks.push({
             url: taskUrl,
@@ -168,9 +153,10 @@ async function loadTasks() {
     return tasks;
 }
 
-async function readSolidDocument(url) {
+async function readSolidDocument(url, s, p, o, g) {
     try {
-        return await solidFileClient.rdf.query(url);
+        // rdf.query return an array of statements matching terms (load and cache url content)
+        return await solidFileClient.rdf.query(url, s, p, o, g);
     } catch (error) {
         return null;
     }
@@ -204,10 +190,8 @@ async function deleteSolidDocument(url) {
         throw new Error(`Failed deleting document at ${url}, returned status ${response.status}`);
 }
 
-async function createSolidContainer(url, name) {
-    const response = await solidFileClient.createFolder(`${url}${name}/`, {
-        headers: { 'Slug': name },
-    });
+async function createSolidContainer(url) {
+    const response = await solidFileClient.createFolder(url)
 
     if (!isSuccessfulStatusCode(response.status))
         throw new Error(`Failed creating container at ${url}, returned status ${response.status}`);
@@ -226,31 +210,31 @@ function getSolidDocumentUrl(resourceUrl) {
 }
 
 async function fetchUserProfile(webId) {
-    const profileQuads = await readSolidDocument(webId);
-    const nameQuad = profileQuads.find(quad => quad.predicate.value === 'http://xmlns.com/foaf/0.1/name');
-    const storageQuad = profileQuads.find(quad => quad.predicate.value === 'http://www.w3.org/ns/pim/space#storage');
-
+    const [nameQuad] = await readSolidDocument(webId, null, { foaf: 'name' })
+    await findPodStorage(webId)
     return {
         url: webId,
-        name: nameQuad?.object.value || 'Anonymous',
-        storageUrl: storageQuad?.object.value || await findUserStorage(webId),
+        name: nameQuad?.object.value || webId.split('//')[1].split('/profile')[0], // replace 'Anonymous',
+        storageUrl: await findPodStorage(webId),
     };
 }
 
-async function findUserStorage(url) {
+async function findPodStorage(url) {
     url = url.replace(/#.*$/, '');
     url = url.endsWith('/') ? url + '../' : url + '/../';
     url = new URL(url);
 
-    const response = await solidFileClient.fetch(url.href);
+    // following solid/protocol used by NSS and CSS
+    const [StorageQuad] = await readSolidDocument(url.href, null, null, { space: 'Storage' })
 
-    if (response.headers.get('Link')?.includes('<http://www.w3.org/ns/pim/space#Storage>; rel="type"'))
-        return url.href;
+    if (StorageQuad) {
+        return url.href
+    }
 
-    if (url.pathname === '/')
-        return url.href;
+    // for old NSS not following storage discovery protocol
+    if (url.pathname === '/') return url.href
 
-    return findUserStorage(url.href);
+    return findPodStorage(url.href);
 }
 
 function escapeText(text) {
