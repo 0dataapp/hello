@@ -4,7 +4,7 @@
 let user, tasksContainerUrl;
 const solidFileClient = new SolidFileClient(solidClientAuthentication);
 // new @prefix unknown by solid-namespace
-const schema = solidFileClient.rdf.setPrefix('schema', 'https://schema.org/');
+solidFileClient.rdf.setPrefix('schema', 'https://schema.org/');
 
 async function restoreSession() {
     // This function uses Inrupt's authentication library to restore a previous session. If you were
@@ -78,6 +78,12 @@ async function performTaskCreation(description) {
     // - SAI, or Solid App Interoperability. This one is still being defined:
     //   https://solid.github.io/data-interoperability-panel/specification/
 
+    if (!tasksContainerUrl) {
+        await createSolidContainer(`${user.storageUrl}tasks/`);
+
+        tasksContainerUrl = `${user.storageUrl}tasks/`;
+    }
+
     const documentUrl = await createSolidDocument(tasksContainerUrl, `
         @prefix schema: <https://schema.org/> .
 
@@ -118,16 +124,14 @@ async function loadTasks() {
     // In a real application, you shouldn't hard-code the path to the container like we're doing here.
     // Read more about this in the comments on the performTaskCreation function.
 
-    if (!tasksContainerUrl) {
-        await createSolidContainer(`${user.storageUrl}tasks/`);
-
-        tasksContainerUrl = `${user.storageUrl}tasks/`;
-    }
-
     const tasks = [];
     const containmentQuads = await readSolidDocument(`${user.storageUrl}tasks/`, null, { ldp: 'contains' })
 
-    if (!containmentQuads) { return [] }
+    if (!containmentQuads) {
+        return [];
+    }
+
+    tasksContainerUrl = `${user.storageUrl}tasks/`;
 
     for (const containmentQuad of containmentQuads) {
         const [typeQuad] = await readSolidDocument(containmentQuad.object.value, null, null, '<https://schema.org/Action>');
@@ -211,7 +215,6 @@ function getSolidDocumentUrl(resourceUrl) {
 
 async function fetchUserProfile(webId) {
     const [nameQuad] = await readSolidDocument(webId, null, { foaf: 'name' })
-    await findPodStorage(webId)
     return {
         url: webId,
         name: nameQuad?.object.value || webId.split('//')[1].split('/profile')[0], // replace 'Anonymous',
@@ -231,7 +234,7 @@ async function findPodStorage(url) {
         return url.href
     }
 
-    // for old NSS not following storage discovery protocol
+    // for providers that don't advertise storage properly
     if (url.pathname === '/') return url.href
 
     return findPodStorage(url.href);
