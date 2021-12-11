@@ -3,8 +3,6 @@
 
 let user, tasksContainerUrl;
 const solidFileClient = new SolidFileClient(solidClientAuthentication);
-// new @prefix unknown by solid-namespace
-solidFileClient.rdf.setPrefix('schema', 'https://schema.org/');
 
 async function restoreSession() {
     // This function uses Inrupt's authentication library to restore a previous session. If you were
@@ -129,22 +127,21 @@ async function loadTasks() {
 
     if (!containmentQuads) {
         return [];
-    }
 
+    }
     tasksContainerUrl = `${user.storageUrl}tasks/`;
 
     for (const containmentQuad of containmentQuads) {
-        const [typeQuad] = await readSolidDocument(containmentQuad.object.value, null, null, '<https://schema.org/Action>');
+        const [typeQuad] = await readSolidDocument(containmentQuad.object.value, null, { rdf: 'type' }, '<https://schema.org/Action>');
 
         if (!typeQuad) {
             // Not a Task, we can ignore this document.
+
             continue;
         }
 
         const taskUrl = typeQuad.subject.value;
-
-        // https://schema.org ontology : in first line using the 'getPrefix() help, second line with a simple ttl string
-        const [descriptionQuad] = await readSolidDocument(containmentQuad.object.value, `<${taskUrl}>`, { schema: 'description' });
+        const [descriptionQuad] = await readSolidDocument(containmentQuad.object.value, `<${taskUrl}>`, '<https://schema.org/description>');
         const [statusQuad] = await readSolidDocument(containmentQuad.object.value, `<${taskUrl}>`, '<https://schema.org/actionStatus>');
 
         tasks.push({
@@ -157,10 +154,10 @@ async function loadTasks() {
     return tasks;
 }
 
-async function readSolidDocument(url, s, p, o, g) {
+async function readSolidDocument(url, source, predicate, object, graph) {
     try {
         // rdf.query return an array of statements matching terms (load and cache url content)
-        return await solidFileClient.rdf.query(url, s, p, o, g);
+        return await solidFileClient.rdf.query(url, source, predicate, object, graph);
     } catch (error) {
         return null;
     }
@@ -217,7 +214,7 @@ async function fetchUserProfile(webId) {
     const [nameQuad] = await readSolidDocument(webId, null, { foaf: 'name' })
     return {
         url: webId,
-        name: nameQuad?.object.value || webId.split('//')[1].split('/profile')[0], // replace 'Anonymous',
+        name: nameQuad?.object.value || 'Anonymous',
         storageUrl: await findPodStorage(webId),
     };
 }
@@ -228,7 +225,7 @@ async function findPodStorage(url) {
     url = new URL(url);
 
     // following solid/protocol used by NSS and CSS
-    const [StorageQuad] = await readSolidDocument(url.href, null, null, { space: 'Storage' })
+    const [StorageQuad] = await solidFileClient.rdf.query(url.href, null, null, { space: 'Storage' })
 
     if (StorageQuad) {
         return url.href
