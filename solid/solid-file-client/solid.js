@@ -215,26 +215,26 @@ async function fetchUserProfile(webId) {
     return {
         url: webId,
         name: nameQuad?.object.value || 'Anonymous',
-        storageUrl: await findPodStorage(webId),
+        storageUrl: await findeUserStorage(webId),
     };
 }
 
-async function findPodStorage(url) {
+async function findeUserStorage(url) {
     url = url.replace(/#.*$/, '');
     url = url.endsWith('/') ? url + '../' : url + '/../';
     url = new URL(url);
 
     // following solid/protocol used by NSS and CSS
-    const [StorageQuad] = await solidFileClient.rdf.query(url.href, null, null, { space: 'Storage' })
+    const response = await solidFileClient.head(url.href)
 
-    if (StorageQuad) {
+    if (response.headers.get('Link')?.includes('<http://www.w3.org/ns/pim/space#Storage>; rel="type"')) {
         return url.href
     }
 
     // for providers that don't advertise storage properly
     if (url.pathname === '/') return url.href
 
-    return findPodStorage(url.href);
+    return findeUserStorage(url.href);
 }
 
 function escapeText(text) {
