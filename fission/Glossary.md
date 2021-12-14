@@ -1,13 +1,10 @@
 # Glossary
 
-- **Solid POD:** This is your personal storage where Solid applications store files.
-- **Identity provider:** This is the service used to perform authentication, it is often served in the same url as your POD (but not always).
-- **WebId:** The url that identifies you as a person, for example `https://noeldemartin.solidcommunity.net/profile/card#me`. WebIds can also identify organizations and groups, it's not limited to individuals.
-- **Solid document:** Data stored in your POD can either be a binary, like an image or video, or an RDF document. Although these are called documents, this doesn't mean that they are stored in a text file. Documents are represented by a url, and the Solid POD can persist them in any way (text files, database, etc.).
-- **Solid container:** A collection of documents and binary resources. [Learn more](https://www.w3.org/TR/ldp-primer/).
-- **Solid Profile:** This is the document that contains information about you. It is the document that contains your webId. For example `https://noeldemartin.solidcommunity.net/profile/card`.
-- **RDF:** Resource Definition Framework, the abstract data representation for data in Solid. [Learn more](https://www.w3.org/TR/rdf11-concepts/).
-- **Turtle:** A specific RDF encoding format. [Learn more](https://www.w3.org/TR/turtle/).
-- **SPARQL:** Query language used to query RDF data. [Learn more](https://www.w3.org/TR/sparql11-query/).
+- **Webnative**: The name of the Fission SDK. Currently focused on Fission infrastructure, the goal is to be fully decentralised. [Learn more](https://guide.fission.codes/developers/webnative).
+- **WNFS**: Short for Web Native File System. A filesystem with both encrypted and public files. Access is granted through private keys. [Learn more](https://guide.fission.codes/developers/webnative/file-system-wnfs).
+- **Auth lobby**: The authentication/authorisation lobby. Here lives your private key that has access to everything in your filesystem. From here you can link other devices and grant apps to specific parts of your data. [Learn more](https://guide.fission.codes/developers/webnative/auth).
+- **DID**: Decentralised identifier, used to identify things or people. Fission accounts have both an associated username and a DID. [Learn more](https://en.wikipedia.org/wiki/Decentralized_identifiers).
+- **UCAN**: User Controlled Authorization Network, is a specialised JWT (JSON Web Token) that allows you to do decentralised authorisation (not needing a centralised server). The lobby issues UCANs to apps and your other devices. [Learn more](https://github.com/ucan-wg/ts-ucan).
+- **IPFS**: A distributed system for storing and accessing content-addressed data. Webnative and Fission uses this for networking and data transfer. [Learn more](https://docs.ipfs.io/concepts/what-is-ipfs/).
 
-Learn more about Solid at https://solidproject.org.
+Learn more about Fission at https://fission.codes.
