@@ -1,12 +1,13 @@
 # Solid Hello World
 
-This is a simple application illustrating how to get started with [Solid](https://solidproject.org/).
+This folder contains some simple applications illustrating how to get started with [Solid](https://solidproject.org/) using different libraries.
 
-It only has two dependencies: [an authentication library](https://github.com/inrupt/solid-client-authn-js) and [an RDF parsing library](https://github.com/rdfjs/N3.js). Everything else is plain HTML, CSS and JavaScript. All the functionality related with Solid is contained in a single file; `solid.js`.
+- [solid-rest-api](./solid-rest-api): This example is the most minimal, it only uses the authentication library and a Turtle parser. All the interaction with the POD is implemented using the native `fetch` function.
+- [solid-file-client](./solid-file-client): This example uses a higher-level library called [solid-file-client](https://github.com/jeff-zucker/solid-file-client). It's still a pretty minimal library, but makes some basic operations easier.
 
 ## Understanding the code
 
-If you're not familiar with the basics of Solid, we strongly suggest that you check out [the glossary](Glossary.md). You can find more specific documentation about the code in this app within the [solid.js](./solid.js) file.
+If you're not familiar with the basics of Solid, we strongly suggest that you check out [the glossary](Glossary.md). You can find more documentation about each code sample in the source files, they contain inline comments specific to each implementation.
 
 The `index.html` and `main.js` files are not documented, but they should be fairly easy to understand if you're already familiar with HTML and JavaScript. The application doesn't have any custom CSS because it uses a classless CSS framework called [Simple.css](https://simplecss.org).
 
@@ -49,3 +50,5 @@ There are already some existing examples using more libraries:
 - [Solid To-Do App Tutorial](https://www.virginiabalseiro.com/blog/tutorial) ([React](https://reactjs.org/) + [solid-client](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/read-write-data/)): A tutorial of how to build a To-Do app using [Inrupt](https://inrupt.com/)'s libraries.
 - [Ramen](https://github.com/noeldemartin/ramen) ([Vue](https://vuejs.org/) + [soukai-solid](https://github.com/noeldemartin/soukai-solid)): A simple application that adds a recipe for Ramen to your POD. This application can also serve as an example to use the type index.
 - [Hello Solid](https://wkokgit.github.io/hellosolid/) ([JQuery](https://jquery.com/) + [rdflib](https://github.com/linkeddata/rdflib.js)/[LDFlex](https://github.com/LDflex/LDflex)): A Solid Client application to explain the basics of Solid. Keep in mind that this library uses the deprecated [solid-auth-client](https://github.com/solid/solid-auth-client) for authentication, and will not work with newer Solid PODs.
+
+You can also check out [this list](https://timea.solidcommunity.net/HelloWorld/index.html).
