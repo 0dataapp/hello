@@ -77,7 +77,7 @@ async function performTaskCreation(description) {
     //   https://solid.github.io/data-interoperability-panel/specification/
 
     if (!tasksContainerUrl) {
-        await createSolidContainer(user.storageUrl, 'tasks');
+        await createSolidContainer(`${user.storageUrl}tasks/`);
 
         tasksContainerUrl = `${user.storageUrl}tasks/`;
     }
@@ -122,23 +122,17 @@ async function loadTasks() {
     // In a real application, you shouldn't hard-code the path to the container like we're doing here.
     // Read more about this in the comments on the performTaskCreation function.
 
-    const containerQuads = await readSolidDocument(`${user.storageUrl}tasks/`);
+    const tasks = [];
+    const containmentQuads = await readSolidDocument(`${user.storageUrl}tasks/`, null, { ldp: 'contains' })
 
-    if (!containerQuads)
+    if (!containmentQuads) {
         return [];
 
+    }
     tasksContainerUrl = `${user.storageUrl}tasks/`;
 
-    const tasks = [];
-    const containmentQuads = containerQuads.filter(quad => quad.predicate.value === 'http://www.w3.org/ns/ldp#contains');
-
     for (const containmentQuad of containmentQuads) {
-        const documentQuads = await readSolidDocument(containmentQuad.object.value);
-        const typeQuad = documentQuads.find(
-            quad =>
-                quad.predicate.value === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' &&
-                quad.object.value === 'https://schema.org/Action'
-        );
+        const [typeQuad] = await readSolidDocument(containmentQuad.object.value, null, { rdf: 'type' }, '<https://schema.org/Action>');
 
         if (!typeQuad) {
             // Not a Task, we can ignore this document.
@@ -147,16 +141,8 @@ async function loadTasks() {
         }
 
         const taskUrl = typeQuad.subject.value;
-        const descriptionQuad = documentQuads.find(
-            quad =>
-                quad.subject.value === taskUrl &&
-                quad.predicate.value === 'https://schema.org/description'
-        );
-        const statusQuad = documentQuads.find(
-            quad =>
-                quad.subject.value === taskUrl &&
-                quad.predicate.value === 'https://schema.org/actionStatus'
-        );
+        const [descriptionQuad] = await readSolidDocument(containmentQuad.object.value, `<${taskUrl}>`, '<https://schema.org/description>');
+        const [statusQuad] = await readSolidDocument(containmentQuad.object.value, `<${taskUrl}>`, '<https://schema.org/actionStatus>');
 
         tasks.push({
             url: taskUrl,
@@ -168,9 +154,10 @@ async function loadTasks() {
     return tasks;
 }
 
-async function readSolidDocument(url) {
+async function readSolidDocument(url, source, predicate, object, graph) {
     try {
-        return await solidFileClient.rdf.query(url);
+        // rdf.query return an array of statements matching terms (load and cache url content)
+        return await solidFileClient.rdf.query(url, source, predicate, object, graph);
     } catch (error) {
         return null;
     }
@@ -204,10 +191,8 @@ async function deleteSolidDocument(url) {
         throw new Error(`Failed deleting document at ${url}, returned status ${response.status}`);
 }
 
-async function createSolidContainer(url, name) {
-    const response = await solidFileClient.createFolder(`${url}${name}/`, {
-        headers: { 'Slug': name },
-    });
+async function createSolidContainer(url) {
+    const response = await solidFileClient.createFolder(url)
 
     if (!isSuccessfulStatusCode(response.status))
         throw new Error(`Failed creating container at ${url}, returned status ${response.status}`);
@@ -226,31 +211,30 @@ function getSolidDocumentUrl(resourceUrl) {
 }
 
 async function fetchUserProfile(webId) {
-    const profileQuads = await readSolidDocument(webId);
-    const nameQuad = profileQuads.find(quad => quad.predicate.value === 'http://xmlns.com/foaf/0.1/name');
-    const storageQuad = profileQuads.find(quad => quad.predicate.value === 'http://www.w3.org/ns/pim/space#storage');
-
+    const [nameQuad] = await readSolidDocument(webId, null, { foaf: 'name' })
     return {
         url: webId,
         name: nameQuad?.object.value || 'Anonymous',
-        storageUrl: storageQuad?.object.value || await findUserStorage(webId),
+        storageUrl: await findeUserStorage(webId),
     };
 }
 
-async function findUserStorage(url) {
+async function findeUserStorage(url) {
     url = url.replace(/#.*$/, '');
     url = url.endsWith('/') ? url + '../' : url + '/../';
     url = new URL(url);
 
-    const response = await solidFileClient.fetch(url.href);
+    // following solid/protocol used by NSS and CSS
+    const response = await solidFileClient.head(url.href)
 
-    if (response.headers.get('Link')?.includes('<http://www.w3.org/ns/pim/space#Storage>; rel="type"'))
-        return url.href;
+    if (response.headers.get('Link')?.includes('<http://www.w3.org/ns/pim/space#Storage>; rel="type"')) {
+        return url.href
+    }
 
-    if (url.pathname === '/')
-        return url.href;
+    // for providers that don't advertise storage properly
+    if (url.pathname === '/') return url.href
 
-    return findUserStorage(url.href);
+    return findeUserStorage(url.href);
 }
 
 function escapeText(text) {

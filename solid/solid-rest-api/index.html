@@ -9,7 +9,7 @@
     </head>
 
     <body>
-        <h1>Solid-File-Client Hello World</h1>
+        <h1>Solid-Rest-Api Hello World</h1>
 
         <div id="loading">
             <p>Loading...</p>
@@ -19,9 +19,11 @@
             <p>Hi there!</p>
             <p>
                 This page is a showcase of a simple <a href="https://solidproject.org/" target="_blank">Solid application</a>
-                built using the <a href="https://github.com/jeff-zucker/solid-file-client">solid-file-client</a> library. You can look at the source code and learn how to use it in
-                <a href="https://github.com/0dataapp/hello/tree/main/solid/solid-file-client" target="_blank">the repository</a>.
+                built using JavaScript, CSS and HTML. You can look at the source code and learn how to use it in the
+                <a href="https://github.com/0dataapp/hello/tree/main/solid/solid-rest-api" target="_blank">solid-rest-api repository</a>.
             </p>
+
+            <p>If you want to see other examples, you can find them here: <a href="../index.html">Solid Hello World Examples</a>.</p>
 
             <button id="login-button" type="button" onclick="login()">Log in with Solid</button>
         </div>
@@ -35,10 +37,10 @@
             <button type="button" onclick="createTask()">Create new task</button>
         </div>
 
+        <script src="https://cdn.jsdelivr.net/npm/n3-browserify@1.11.1"></script>
         <script src="https://cdn.jsdelivr.net/npm/@inrupt/solid-client-authn-browser@1.11.2/dist/solid-client-authn.bundle.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/solid-file-client@1.2.5/dist/window/solid-file-client.bundle.js"></script>
-        <script src="./solid.js"></script>
-        <script src="./main.js"></script>
+        <script src="solid.js"></script>
+        <script src="main.js"></script>
 
         <small>Or, go back to <a href="../../">the homepage</a>.</small>
     </body>
