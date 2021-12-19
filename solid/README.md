@@ -2,8 +2,8 @@
 
 This folder contains some simple applications illustrating how to get started with [Solid](https://solidproject.org/) using different libraries.
 
+- [solid-file-client](./solid-file-client): This example uses a higher-level library called [solid-file-client](https://github.com/jeff-zucker/solid-file-client). It's pretty minimal library, but makes some basic operations easier.
 - [solid-rest-api](./solid-rest-api): This example is the most minimal, it only uses the authentication library and a Turtle parser. All the interaction with the POD is implemented using the native `fetch` function.
-- [solid-file-client](./solid-file-client): This example uses a higher-level library called [solid-file-client](https://github.com/jeff-zucker/solid-file-client). It's still a pretty minimal library, but makes some basic operations easier.
 
 ## Understanding the code
 
