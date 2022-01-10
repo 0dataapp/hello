@@ -17,7 +17,7 @@ If you want to play around with the application, you'll need to log into a [Soli
 
 ```sh
 npm install -g @solid/community-server
-community-solid-server -c @css:config/file.json -p 4000 -f ./solid-pod
+community-solid-server -c @css:config/file-no-setup.json -p 4000 -f ./solid-pod
 ```
 
 If you want to modify the code, you'll also need to serve the application in a url. You could just open the `index.html` file in a browser, but unfortunately that will not work because the authentication flow performs a redirect and that won't work with a website being served with the `file://` protocol.
