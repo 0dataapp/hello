@@ -4,45 +4,21 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width">
-        <title>Solid Hello World</title>
+        <title>Solid Hello World Examples</title>
         <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
     </head>
 
     <body>
-        <h1>Solid Hello World</h1>
+        <h1>Solid Hello World Examples</h1>
 
-        <div id="loading">
-            <p>Loading...</p>
-        </div>
+        <p>Here you can find more examples following the same simple structure, but using some advanced libraries:</p>
 
-        <div id="auth-guest" hidden>
-            <p>Hi there!</p>
-            <p>
-                This page is a showcase of a simple <a href="https://solidproject.org/" target="_blank">Solid application</a>
-                built using JavaScript, CSS and HTML. You can look at the source code and learn how to use it in
-                <a href="https://github.com/0dataapp/hello/tree/main/solid" target="_blank">the repository</a>.
-            </p>
+        <ul>
+            <li><a href="solid-file-client/">solid-file-client library</a></li>
+            <li><a href="solid-rest-api/">REST API</a></li>
+        </ul>
 
-            <p>If you want to see other examples, you can find them here: <a href="./all.html">Solid Hello World Examples</a>.</p>
-
-            <button id="login-button" type="button" onclick="login()">Log in with Solid</button>
-        </div>
-
-        <div id="auth-user" hidden>
-            <p>Hello, <span id="username"></span>!</p>
-            <button id="logout-button" type="button" onclick="logout()">Log out</button>
-
-            <h2>Your tasks</h2>
-            <ul id="tasks"></ul>
-            <button type="button" onclick="createTask()">Create new task</button>
-        </div>
-
-        <script src="https://cdn.jsdelivr.net/npm/n3-browserify@1.11.1"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@inrupt/solid-client-authn-browser@1.11.2/dist/solid-client-authn.bundle.js"></script>
-        <script src="solid.js"></script>
-        <script src="main.js"></script>
-
-        <small>Or, go back to <a href="../">the homepage</a>.</small>
+        <p>If you would like to see even more advanced examples, you can find them in the <a href="https://github.com/0dataapp/hello/tree/main/solid#this-example-is-too-simple-can-you-make-one-using-more-libraries">FAQs</a>.</p>
     </body>
 
-</html>
+    </html>

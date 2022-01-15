@@ -75,11 +75,8 @@ async function performTaskCreation(description) {
     // - SAI, or Solid App Interoperability. This one is still being defined:
     //   https://solid.github.io/data-interoperability-panel/specification/
 
-    if (!tasksContainerUrl) {
-        await createSolidContainer(user.storageUrl, 'tasks');
-
-        tasksContainerUrl = `${user.storageUrl}tasks/`;
-    }
+    if (!tasksContainerUrl)
+        tasksContainerUrl = await createSolidContainer(user.storageUrl, 'tasks');
 
     const documentUrl = await createSolidDocument(tasksContainerUrl, `
         @prefix schema: <https://schema.org/> .
@@ -228,6 +225,10 @@ async function createSolidContainer(url, name) {
 
     if (!isSuccessfulStatusCode(response.status))
         throw new Error(`Failed creating container at ${url}, returned status ${response.status}`);
+
+    const location = response.headers.get('Location');
+
+    return new URL(location, url).href;
 }
 
 function isSuccessfulStatusCode(statusCode) {
@@ -250,6 +251,10 @@ async function fetchUserProfile(webId) {
     return {
         url: webId,
         name: nameQuad?.object.value || 'Anonymous',
+
+        // WebIds may declare more than one storage url, so in a real application you should
+        // ask which one to use if that happens. In this app, in order to keep it simple, we'll
+        // just use the first one. If none is declared in the profile, we'll search for it.
         storageUrl: storageQuad?.object.value || await findUserStorage(webId),
     };
 }
