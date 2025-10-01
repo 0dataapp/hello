@@ -1,4 +1,4 @@
-var Todos = {
+const todos = {
   name: 'todos',
   builder: function(privateClient) {
     privateClient.declareType('todo', {
@@ -13,16 +13,14 @@ var Todos = {
     return {
       exports: {
 
-        init: function() {
-          privateClient.cache('');
-        },
+        cacheTodos: () => privateClient.cache(''),
 
         on: privateClient.on,
 
         async addTask (description) {
           const id = Date.now().toString(36).toLowerCase();
+
           const item = {
-            id,
             description,
           };
           
@@ -32,7 +30,6 @@ var Todos = {
         },
 
         async updateTask (id, completed) {
-          debugger
           // set `maxAge` to `false` to read from cache first
           const item = await privateClient.getObject(id, false);
 
@@ -47,7 +44,10 @@ var Todos = {
 
         listTasks: function() {
           return privateClient.getAll('');
-        }
+        },
+
+        listTasks: () => privateClient.getAll('', false).then(map => Object.entries(map).reduce((coll, item) => coll.concat(Object.assign(item[1], { id: item[0] })), [])),
+
       }
     }
   }

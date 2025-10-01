@@ -73,13 +73,13 @@ function appendTaskItem(task) {
     taskItem.innerHTML = `
         <button
             type="button"
-            onclick="deleteTask('${task.url}', this.parentElement, this)"
+            onclick="deleteTask('${task.id}', this.parentElement, this)"
         >
             Delete
         </button>
         <button
             type="button"
-            onclick="updateTask('${task.url}', this)"
+            onclick="updateTask('${task.id}', this)"
             style="width:100px"
         >
             ${task.completed ? 'Undo' : 'Complete'}
