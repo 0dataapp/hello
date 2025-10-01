@@ -30,7 +30,6 @@ const todos = {
         },
 
         async updateTask (id, completed) {
-          debugger
           // set `maxAge` to `false` to read from cache first
           const item = await privateClient.getObject(id, false);
 
