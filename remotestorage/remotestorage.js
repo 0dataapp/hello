@@ -1,7 +1,5 @@
 const remoteStorage = new RemoteStorage({
-  modules: [
-      Todos,
-  ],
+  modules: [todos],
 });
 
 async function init() {

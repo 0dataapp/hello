@@ -1,4 +1,4 @@
-var Todos = {
+var todos = {
   name: 'todos',
   builder: function(privateClient) {
     privateClient.declareType('todo', {
