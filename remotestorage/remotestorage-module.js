@@ -5,9 +5,9 @@ var Todos = {
       type: 'object',
       properties: {
         description: { type: 'string' },
-        completed: { type: 'boolean' }
+        completed: { type: 'boolean' },
       },
-      required: ['description']
+      required: ['description'],
     });
 
     return {
