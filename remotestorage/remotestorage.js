@@ -9,25 +9,8 @@ remoteStorage.access.claim('todos', 'rw');
 remoteStorage.todos.cacheTodos();
 
 async function init() {
-  // // handle change events
-  // remoteStorage.todos.on('change', function(event) {
-  //   if(event.newValue && (! event.oldValue)) {
-  //     console.log('Change from '+event.origin+' (add)', event);
-  //   }
-  //   else if((! event.newValue) && event.oldValue) {
-  //     console.log('Change from '+event.origin+' (remove)', event);
-  //   }
-  //   else if(event.newValue && event.oldValue) {
-  //     console.log('Change from '+event.origin+' (change)', event);
-  //   }
-  // });
-
   // wrap ready event handler in promise
-  return new Promise(function (res) {
-    remoteStorage.on('ready', function() {
-        return res();
-    }); 
-  });
+  return new Promise((res) => remoteStorage.on('ready', res));
 }
 
 async function restoreSession() {
