@@ -8,6 +8,7 @@ remoteStorage.access.claim('todos', 'rw');
 
 remoteStorage.todos.cacheTodos();
 
+// implement Hello API for `common/main.js`
 async function init() {
   // wrap ready event handler in promise
   return new Promise((res) => remoteStorage.on('ready', res));
