@@ -50,13 +50,13 @@ async function createTask() {
 }
 
 async function updateTask(taskUrl, button) {
-    const done = button.innerText === 'Complete';
+    const completed = button.innerText === 'Complete';
     button.setAttribute('disabled', '');
 
-    await performTaskUpdate(taskUrl, done);
+    await performTaskUpdate(taskUrl, completed);
 
     button.removeAttribute('disabled');
-    button.innerText = done ? 'Undo' : 'Complete';
+    button.innerText = completed ? 'Undo' : 'Complete';
 }
 
 async function deleteTask(taskUrl, taskElement, button) {
@@ -82,7 +82,7 @@ function appendTaskItem(task) {
             onclick="updateTask('${task.url}', this)"
             style="width:100px"
         >
-            ${task.done ? 'Undo' : 'Complete'}
+            ${task.completed ? 'Undo' : 'Complete'}
         </button>
         <span>${task.description}</span>
     `;

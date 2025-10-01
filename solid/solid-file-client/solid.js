@@ -94,19 +94,19 @@ async function performTaskCreation(description) {
     return { url: taskUrl, description };
 }
 
-async function performTaskUpdate(taskUrl, done) {
+async function performTaskUpdate(taskUrl, completed) {
     const documentUrl = getSolidDocumentUrl(taskUrl);
 
     await updateSolidDocument(documentUrl, `
         DELETE DATA {
             <#it>
                 <https://schema.org/actionStatus>
-                <https://schema.org/${done ? 'PotentialActionStatus' : 'CompletedActionStatus'}> .
+                <https://schema.org/${completed ? 'PotentialActionStatus' : 'CompletedActionStatus'}> .
         } ;
         INSERT DATA {
             <#it>
                 <https://schema.org/actionStatus>
-                <https://schema.org/${done ? 'CompletedActionStatus' : 'PotentialActionStatus'}> .
+                <https://schema.org/${completed ? 'CompletedActionStatus' : 'PotentialActionStatus'}> .
         }
     `);
 }
@@ -146,7 +146,7 @@ async function loadTasks() {
         tasks.push({
             url: taskUrl,
             description: descriptionQuad?.object.value || '-',
-            done: statusQuad?.object.value === 'https://schema.org/CompletedActionStatus',
+            completed: statusQuad?.object.value === 'https://schema.org/CompletedActionStatus',
         });
     }
 

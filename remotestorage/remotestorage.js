@@ -74,7 +74,7 @@ async function performTaskCreation(description) {
     return await remoteStorage.todos.addTask(description);
 }
 
-async function performTaskUpdate(taskUrl, done) {
+async function performTaskUpdate(taskUrl, completed) {
     await remoteStorage.todos.updateTask(...arguments);
 }
 

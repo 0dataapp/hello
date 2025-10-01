@@ -89,11 +89,11 @@ async function performTaskCreation(description) {
     return item;
 }
 
-async function performTaskUpdate(taskUrl, done) {
+async function performTaskUpdate(taskUrl, completed) {
     const item = JSON.parse(await wnfs.cat(webnative.path.file('private', 'todos', taskUrl)));
 
     await wnfs.write(webnative.path.file('private', 'todos', item.url), JSON.stringify(Object.assign(item, {
-      done,
+      completed,
     })));
     await wnfs.publish();
 

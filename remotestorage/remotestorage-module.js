@@ -5,7 +5,7 @@ var Todos = {
       type: 'object',
       properties: {
         description: { type: 'string' },
-        done: { type: 'boolean' }
+        completed: { type: 'boolean' }
       },
       required: ['description']
     });
@@ -36,7 +36,7 @@ var Todos = {
           const item = await privateClient.getObject(url, false);
 
           await privateClient.storeObject('todo', item.url, Object.assign(item, {
-            done,
+            completed,
           }));
 
           return item;
