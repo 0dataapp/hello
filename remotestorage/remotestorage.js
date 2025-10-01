@@ -1,16 +1,14 @@
+// remoteStorage module
 const remoteStorage = new RemoteStorage({
   modules: [todos],
+  changeEvents: { local: true, window: true, remote: true, conflict: true },
 });
 
+remoteStorage.access.claim('todos', 'rw');
+
+remoteStorage.todos.cacheTodos();
+
 async function init() {
-  remoteStorage.access.claim('todos', 'rw');
-
-  // // mount the optional Connect widget
-  // var widget = new Widget(remoteStorage);
-  // widget.attach();
-
-  remoteStorage.todos.init();
-
   // // handle change events
   // remoteStorage.todos.on('change', function(event) {
   //   if(event.newValue && (! event.oldValue)) {

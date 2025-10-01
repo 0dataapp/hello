@@ -1,4 +1,4 @@
-var todos = {
+const todos = {
   name: 'todos',
   builder: function(privateClient) {
     privateClient.declareType('todo', {
@@ -13,9 +13,7 @@ var todos = {
     return {
       exports: {
 
-        init: function() {
-          privateClient.cache('');
-        },
+        cacheTodos: () => privateClient.cache(''),
 
         on: privateClient.on,
 
