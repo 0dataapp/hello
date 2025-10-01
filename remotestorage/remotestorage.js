@@ -9,7 +9,7 @@ remoteStorage.access.claim('todos', 'rw');
 remoteStorage.todos.cacheTodos();
 
 // implement Hello API for `common/main.js`
-async function init() {
+function init() {
   // wrap ready event handler in promise
   return new Promise((res) => remoteStorage.on('ready', res));
 }
@@ -46,22 +46,22 @@ function performLogin(storageAddress) {
 	remoteStorage.connect(storageAddress);
 }
 
-async function performLogout() {
+function performLogout() {
 	return remoteStorage.disconnect();
 }
 
-async function performTaskCreation(description) {
-	return await remoteStorage.todos.addTask(description);
+function performTaskCreation(description) {
+	return remoteStorage.todos.addTask(description);
 }
 
-async function performTaskUpdate(taskUrl, completed) {
-	await remoteStorage.todos.updateTask(...arguments);
+function performTaskUpdate(taskUrl, completed) {
+	return remoteStorage.todos.updateTask(...arguments);
 }
 
-async function performTaskDeletion(taskUrl) {
-	await remoteStorage.todos.deleteTask(taskUrl);
+function performTaskDeletion(taskUrl) {
+	return remoteStorage.todos.deleteTask(taskUrl);
 }
 
-async function loadTasks() {
-	return Object.values(await remoteStorage.todos.listTasks());
+function loadTasks() {
+	return remoteStorage.todos.listTasks();
 }
