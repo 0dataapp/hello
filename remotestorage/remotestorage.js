@@ -14,53 +14,53 @@ async function init() {
 }
 
 async function restoreSession() {
-    // wait for library ready event
-    await init();
+	// wait for library ready event
+	await init();
 
-    try {
-        if (!remoteStorage.remote.connected)
-            return false;
+	try {
+		if (!remoteStorage.remote.connected)
+			return false;
 
-        return {
-            name: remoteStorage.remote.userAddress,
-            url: remoteStorage.remote.userAddress,
-        };
-    } catch (error) {
-        alert(error.message);
+		return {
+			name: remoteStorage.remote.userAddress,
+			url: remoteStorage.remote.userAddress,
+		};
+	} catch (error) {
+		alert(error.message);
 
-        return false;
-    }
+		return false;
+	}
 }
 
 function getLoginUrl() {
-    const url = prompt('Introduce your remoteStorage address');
+	const url = prompt('Introduce your remoteStorage address');
 
-    if (!url)
-        return null;
+	if (!url)
+		return null;
 
-    return url;
+	return url;
 }
 
 function performLogin(storageAddress) {
-    remoteStorage.connect(storageAddress);
+	remoteStorage.connect(storageAddress);
 }
 
 async function performLogout() {
-    return remoteStorage.disconnect();
+	return remoteStorage.disconnect();
 }
 
 async function performTaskCreation(description) {
-    return await remoteStorage.todos.addTask(description);
+	return await remoteStorage.todos.addTask(description);
 }
 
 async function performTaskUpdate(taskUrl, completed) {
-    await remoteStorage.todos.updateTask(...arguments);
+	await remoteStorage.todos.updateTask(...arguments);
 }
 
 async function performTaskDeletion(taskUrl) {
-    await remoteStorage.todos.deleteTask(taskUrl);
+	await remoteStorage.todos.deleteTask(taskUrl);
 }
 
 async function loadTasks() {
-    return Object.values(await remoteStorage.todos.listTasks());
+	return Object.values(await remoteStorage.todos.listTasks());
 }
