@@ -43,9 +43,9 @@ Also, one of the best ways to debug a Solid application, regardless of what libr
 
 If you want to use a more advanced library, check out this list of [Solid Developer Tools & Libraries](https://solidproject.org/developers/tools).
 
-### This example is too simple, can you make one using more libraries?
+### This example is too simple, can you make one using other libraries?
 
-There are already some existing examples using more libraries:
+Examples using other libraries include:
 
 - [Solid To-Do App Tutorial](https://www.virginiabalseiro.com/blog/tutorial) ([React](https://reactjs.org/) + [solid-client](https://docs.inrupt.com/developer-tools/javascript/client-libraries/tutorial/read-write-data/)): A tutorial of how to build a To-Do app using [Inrupt](https://inrupt.com/)'s libraries.
 - [Ramen](https://github.com/noeldemartin/ramen) ([Vue](https://vuejs.org/) + [soukai-solid](https://github.com/noeldemartin/soukai-solid)): A simple application that adds a recipe for Ramen to your POD. This application can also serve as an example to use the type index.
