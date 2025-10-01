@@ -20,20 +20,21 @@ var Todos = {
         on: privateClient.on,
 
         async addTask (description) {
-          const url = Date.now().toString(36).toLowerCase();
+          const id = Date.now().toString(36).toLowerCase();
           const item = {
-            url,
+            id,
             description,
           };
           
-          await privateClient.storeObject('todo', url, item);
+          await privateClient.storeObject('todo', id, item);
 
           return item;
         },
 
-        async updateTask (url, done) {
+        async updateTask (id, completed) {
+          debugger
           // set `maxAge` to `false` to read from cache first
-          const item = await privateClient.getObject(url, false);
+          const item = await privateClient.getObject(id, false);
 
           await privateClient.storeObject('todo', item.url, Object.assign(item, {
             completed,
