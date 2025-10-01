@@ -19,8 +19,8 @@ const todos = {
 
         async addTask (description) {
           const id = Date.now().toString(36).toLowerCase();
+
           const item = {
-            id,
             description,
           };
           
@@ -44,7 +44,10 @@ const todos = {
 
         listTasks: function() {
           return privateClient.getAll('');
-        }
+        },
+
+        listTasks: () => privateClient.getAll('', false).then(map => Object.entries(map).reduce((coll, item) => coll.concat(Object.assign(item[1], { id: item[0] })), [])),
+
       }
     }
   }
