@@ -36,7 +36,7 @@ var Todos = {
           // set `maxAge` to `false` to read from cache first
           const item = await privateClient.getObject(id, false);
 
-          await privateClient.storeObject('todo', item.url, Object.assign(item, {
+          await privateClient.storeObject('todo', id, Object.assign(item, {
             completed,
           }));
 
