@@ -15,7 +15,7 @@ const todos = {
 
         cacheTodos: () => privateClient.cache(''),
 
-        on: privateClient.on,
+        handle: privateClient.on,
 
         async addTask (description) {
           const id = Date.now().toString(36).toLowerCase();

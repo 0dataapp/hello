@@ -8,6 +8,22 @@ remoteStorage.access.claim('todos', 'rw');
 
 remoteStorage.todos.cacheTodos();
 
+// remoteStorage events
+remoteStorage.todos.handle('change', (event) => {
+  if (event.newValue && !event.oldValue) {
+    return appendTaskItem(event.newValue);
+  }
+
+  if (!event.newValue && event.oldValue) {
+    return removeTaskObject(event.oldValue);
+  }
+
+  if (event.newValue && event.oldValue) {
+  	removeTaskObject(event.oldValue)
+  	return appendTaskItem(event.newValue);
+  }
+});
+
 // implement Hello API for `common/main.js`
 function init() {
   // wrap ready event handler in promise

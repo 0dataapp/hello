@@ -11,12 +11,6 @@ async function main() {
 
     document.getElementById('username').innerHTML = `<a href="${user.url}" target="_blank">${user.name}</a>`;
     document.getElementById('auth-user').removeAttribute('hidden');
-
-    const tasks = await loadTasks();
-
-    for (const task of tasks) {
-        appendTaskItem(task);
-    }
 }
 
 function login() {
@@ -67,8 +61,14 @@ async function deleteTask(taskUrl, taskElement, button) {
     taskElement.remove();
 }
 
+function removeTaskObject(task) {
+    document.querySelector(`li[data-id="${ task.id }"]`).remove();
+}
+
 function appendTaskItem(task) {
     const taskItem = document.createElement('li');
+
+    taskItem.dataset.id = task.id;
 
     taskItem.innerHTML = `
         <button
