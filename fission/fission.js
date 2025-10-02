@@ -104,9 +104,3 @@ async function performTaskDeletion(taskUrl) {
     await wnfs.rm(webnative.path.file('private', 'todos', taskUrl))
     await wnfs.publish();
 }
-
-async function loadTasks() {
-    return (await Promise.all(Object.keys(await wnfs.ls(webnative.path.directory('private', 'todos'))).map(function (e) {
-      return wnfs.cat(webnative.path.file('private', 'todos', e));
-    }))).map(JSON.parse);
-}

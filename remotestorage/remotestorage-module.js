@@ -42,12 +42,6 @@ const todos = {
 
         deleteTask: privateClient.remove.bind(privateClient),
 
-        listTasks: function() {
-          return privateClient.getAll('');
-        },
-
-        listTasks: () => privateClient.getAll('', false).then(map => Object.entries(map).reduce((coll, item) => coll.concat(Object.assign(item[1], { id: item[0] })), [])),
-
       }
     }
   }

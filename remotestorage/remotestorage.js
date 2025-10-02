@@ -77,7 +77,3 @@ function performTaskUpdate(taskUrl, completed) {
 function performTaskDeletion(taskUrl) {
 	return remoteStorage.todos.deleteTask(taskUrl);
 }
-
-function loadTasks() {
-	return remoteStorage.todos.listTasks();
-}
