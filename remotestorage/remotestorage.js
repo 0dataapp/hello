@@ -50,7 +50,7 @@ async function restoreSession() {
 }
 
 function getLoginUrl() {
-	const url = prompt('Introduce your remoteStorage address');
+	const url = prompt('What is your remoteStorage address?');
 
 	if (!url)
 		return null;

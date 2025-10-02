@@ -1,10 +1,14 @@
 # 0data Hello World
 
-These are simple <a href="https://0data.app" target="_blank">0data apps</a> that demonstrate CRUD operations for <code>/todos</code> only using HTML, CSS, and JavaScript (minimal dependencies, no build systems). Please consult the README for any protocol to learn more:
+These are simple <a href="https://0data.app" target="_blank">Zero Data</a> apps demonstrating create/read/update/delete operations for <code>/todos</code> with only HTML, CSS, and JavaScript (minimal dependencies and no build systems).
 
-- [Fission](fission)
+https://hello.0data.app
+
+Please consult the README for any protocol to learn more:
+
 - [remoteStorage](remotestorage)
 - [Solid](solid)
+- [Fission](fission)
 
 ## Usage instructions
 
