@@ -10,8 +10,23 @@ const todos = {
       required: ['description'],
     });
 
+    const dehydrate = function (object) {
+      delete object.id;
+
+      return object;
+    };
+
+    const hydrate = function (path, object) {
+      object.completed = !!object.completed;
+
+      return Object.assign(object, {
+        id: path,
+      });
+    };
+
     return {
       exports: {
+        hydrate,
 
         cacheTodos: () => privateClient.cache(''),
 
@@ -21,25 +36,26 @@ const todos = {
           const item = {
             description,
           };
-          
-          await privateClient.storeObject('todo', new Date().toJSON().replace(/\D/g, ''), item);
 
-          return item;
+          const id = new Date().toJSON().replace(/\D/g);
+          
+          await privateClient.storeObject('todo', id, item);
+
+          return hydrate(id, item);
         },
 
         async updateTask (id, completed) {
           // set `maxAge` to `false` to read from cache first
           const item = await privateClient.getObject(id, false);
 
-          await privateClient.storeObject('todo', id, Object.assign(item, {
+          await privateClient.storeObject('todo', id, dehydrate(Object.assign(item, {
             completed,
-          }));
+          })));
 
-          return item;
+          return hydrate(id, item);
         },
 
         deleteTask: privateClient.remove.bind(privateClient),
-
       }
     }
   }

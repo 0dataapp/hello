@@ -11,16 +11,16 @@ remoteStorage.todos.cacheTodos();
 // remoteStorage events
 remoteStorage.todos.handle('change', (event) => {
   if (event.newValue && !event.oldValue) {
-    return appendTaskItem(event.newValue);
+    return appendTaskItem(remoteStorage.todos.hydrate(event.relativePath, event.newValue));
   }
 
   if (!event.newValue && event.oldValue) {
-    return removeTaskObject(event.oldValue);
+    return removeTaskObject(remoteStorage.todos.hydrate(event.relativePath, event.oldValue));
   }
 
   if (event.newValue && event.oldValue) {
   	removeTaskObject(event.oldValue)
-  	return appendTaskItem(event.newValue);
+  	return appendTaskItem(remoteStorage.todos.hydrate(event.relativePath, event.newValue));
   }
 });
 
