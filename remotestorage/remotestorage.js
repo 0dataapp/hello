@@ -67,7 +67,8 @@ function performLogout() {
 }
 
 function performTaskCreation(description) {
-	return remoteStorage.todos.addTask(description);
+	remoteStorage.todos.addTask(description);
+	return null;
 }
 
 function performTaskUpdate(taskUrl, completed) {

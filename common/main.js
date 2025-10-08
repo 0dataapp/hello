@@ -40,6 +40,10 @@ async function createTask() {
 
     const task = await performTaskCreation(description);
 
+    if (!task) {
+        return;
+    }
+
     appendTaskItem(task);
 }
 
