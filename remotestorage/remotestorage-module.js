@@ -18,13 +18,11 @@ const todos = {
         handle: privateClient.on,
 
         async addTask (description) {
-          const id = Date.now().toString(36).toLowerCase();
-
           const item = {
             description,
           };
           
-          await privateClient.storeObject('todo', id, item);
+          await privateClient.storeObject('todo', new Date().toJSON().replace(/\D/g, ''), item);
 
           return item;
         },
