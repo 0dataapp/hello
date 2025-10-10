@@ -24,6 +24,15 @@ remoteStorage.todos.handle('change', (event) => {
   }
 });
 
+// setup after page loads
+document.addEventListener('DOMContentLoaded', () => {
+	if (window.self !== window.top) {
+		remoteStorage.on('ready', () => {
+		  document.querySelector('h1:first-of-type').remove();
+		});
+	}
+});
+
 // implement Hello API for `common/main.js`
 function init() {
   // wrap ready event handler in promise
