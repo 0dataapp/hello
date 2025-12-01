@@ -37,7 +37,7 @@ const todos = {
             description,
           };
 
-          const id = new Date().toJSON().replace(/\D/g);
+          const id = new Date().toJSON().replace(/\D/g, '');
           
           await privateClient.storeObject('todo', id, item);
 
